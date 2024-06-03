@@ -295,8 +295,8 @@ class ServidorUnitTest {
 	
 	@Test
 	@DisplayName("(3 puntos) Petición \"cifrar\"")
-	void test17() {
-		fail("Not yet implemented");
+	void test17() throws CertificateEncodingException {
+		
 	}
 	
 	@Test
