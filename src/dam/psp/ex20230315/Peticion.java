@@ -35,6 +35,7 @@ public class Peticion implements Runnable {
 	@Override
 	public void run() {
 		System.out.println("Conectado con " + socket.getInetAddress());
+		System.out.println("opciones: \nhash\ncert\ncifrar");
 		try {
 			String peticion = in.readUTF();
 			switch (peticion) {
