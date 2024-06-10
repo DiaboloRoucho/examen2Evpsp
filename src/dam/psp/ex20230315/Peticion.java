@@ -118,6 +118,7 @@ public class Peticion implements Runnable {
 	}
 	
 	private void peticionCert() {
+		//crear certificados con openssl
 		try {
 			String alias = in.readUTF();
 			try {

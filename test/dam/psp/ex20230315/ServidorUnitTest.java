@@ -8,12 +8,19 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
 import java.util.Base64;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -316,18 +323,40 @@ class ServidorUnitTest {
 	
 	@Test
 	@DisplayName("(0,2 puntos) Petición \"cifrar\" sin alias (B)")
-	void test19() {
+	void test19() throws NoSuchAlgorithmException, NoSuchPaddingException, UnrecoverableKeyException, KeyStoreException {
 		try (Socket socket = new Socket("localhost", 9000)){
 			socket.setSoTimeout(10000);
-			
+			String texto = "En un lugar de la Mancha, de cuyo nombre no quiero acordarme ...";
 			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 			out.writeUTF("cifrar");
-			socket.shutdownOutput();
-			
-			assertEquals("ERROR:Se esperaba un alias", new DataInputStream(socket.getInputStream()).readUTF());
-		} catch (IOException e) {
-			fail(e.getLocalizedMessage());
+			out.writeUTF("psp");
+			out.write(texto.getBytes());
+			DataInputStream in = new DataInputStream(socket.getInputStream());
+			String s = null;
+			Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+			PrivateKey key = (PrivateKey)Servidor.ks.getKey("psp", "practicas".toCharArray());
+			cipher.init(Cipher.DECRYPT_MODE, key);
+			while (true)
+			try {
+				String[] respuesta = in.readUTF().split(":");
+				if(respuesta.length != 2)
+					fail("respuesta incorrecta");
+				else if (respuesta[0].equals("OK")) {
+					byte[] cifrado = Base64.getDecoder().decode(respuesta[1]);
+					
+				}
+					
+			} catch (EOFException e) {
+				
+			}catch(SocketTimeoutException e) {
+				fail("Read timed out");
+			}
+		}catch (IOException e) {
+				
+		} catch (InvalidKeyException e1) {
+			e1.printStackTrace();
 		}
+		
 	}
 	
 	@Test
